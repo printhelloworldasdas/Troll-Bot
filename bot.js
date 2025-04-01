@@ -19,6 +19,7 @@ client.once('ready', () => {
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) return; // Si no es un comando, ignoramos
 
+  // Comando /troll
   if (interaction.commandName === 'troll') {
     const mensaje = interaction.options.getString('mensaje'); // Obtenemos el mensaje
 
