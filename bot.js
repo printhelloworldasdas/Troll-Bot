@@ -21,18 +21,29 @@ client.on('interactionCreate', async (interaction) => {
 
   // Comando /troll
   if (interaction.commandName === 'troll') {
-    const mensaje = interaction.options.getString('mensaje'); // Obtenemos el mensaje
+    try {
+      const mensaje = interaction.options.getString('mensaje'); // Obtenemos el mensaje
 
-    // Enviar 10 mensajes en el canal
-    for (let i = 0; i < 10; i++) {
-      await interaction.channel.send(mensaje); // Enviamos el mensaje en el canal
+      // Enviar 10 mensajes en el canal
+      for (let i = 0; i < 10; i++) {
+        await interaction.channel.send(mensaje); // Enviamos el mensaje en el canal
+      }
+
+      // Responder al usuario rápidamente para evitar la expiración de la interacción
+      await interaction.reply({
+        content: 'He enviado los 10 mensajes solicitados!',
+        flags: 64, // Establecemos el flag para que sea solo visible para el usuario
+      });
+    } catch (error) {
+      console.error('Error al manejar la interacción:', error);
+      if (interaction.deferred) {
+        // Si ya hemos diferido la respuesta, respondemos con un error
+        await interaction.editReply('Hubo un error al intentar enviar los mensajes.');
+      } else {
+        // Si no hemos diferido la respuesta, respondemos normalmente
+        await interaction.reply('Hubo un error al intentar enviar los mensajes.');
+      }
     }
-
-    // Respondemos al usuario con un mensaje de confirmación, solo visible para él (usando flags)
-    await interaction.reply({
-      content: 'He enviado los 10 mensajes solicitados!',
-      flags: 64, // Establecemos el flag para que sea solo visible para el usuario
-    }).catch(console.error); // Capturamos posibles errores al responder
   }
 });
 
