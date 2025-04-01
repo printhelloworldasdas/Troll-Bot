@@ -1,5 +1,5 @@
 // Importamos las dependencias necesarias
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 require('dotenv').config();
 
 // Creamos un cliente de Discord
@@ -23,7 +23,32 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.commandName === 'troll') {
     const mensaje = interaction.options.getString('mensaje'); // Obtenemos el mensaje
 
-    // Enviar 10 mensajes en el canal
+    // Crear un botón
+    const button = new ButtonBuilder()
+      .setCustomId('troll_button')
+      .setLabel('Haz clic para recibir los mensajes')
+      .setStyle(ButtonStyle.Primary);
+
+    const row = new ActionRowBuilder().addComponents(button);
+
+    // Respondemos con un mensaje y el botón, ambos solo visibles para el usuario
+    await interaction.reply({
+      content: 'Pss... click this button :D',
+      components: [row],
+      ephemeral: true, // El mensaje y el botón serán solo visibles para el usuario
+    });
+
+    // Guardamos el mensaje en el estado de la interacción para usarlo más tarde
+    interaction.message = {
+      content: mensaje
+    };
+  }
+
+  // Manejamos la acción cuando se presiona el botón
+  if (interaction.customId === 'troll_button') {
+    const mensaje = interaction.message.content; // Usamos el mensaje guardado en la interacción
+
+    // Enviar 10 mensajes
     for (let i = 0; i < 10; i++) {
       await interaction.channel.send(mensaje); // Enviamos el mensaje en el canal
     }
@@ -34,26 +59,6 @@ client.on('interactionCreate', async (interaction) => {
       ephemeral: true, // El mensaje será solo visible para el usuario que interactuó
     });
   }
-});
-
-// Registra los comandos de barra (slash) en el servidor de Discord
-const { SlashCommandBuilder } = require('@discordjs/builders');
-
-const commands = [
-  new SlashCommandBuilder()
-    .setName('troll')
-    .setDescription('Envía 10 mensajes en el canal')
-    .addStringOption(option =>
-      option.setName('mensaje')
-        .setDescription('El mensaje que quieres enviar')
-        .setRequired(true)
-    )
-];
-
-client.on('ready', () => {
-  client.application.commands.set(commands)
-    .then(() => console.log('Comandos registrados correctamente'))
-    .catch(console.error);
 });
 
 // Iniciamos el bot con el token
